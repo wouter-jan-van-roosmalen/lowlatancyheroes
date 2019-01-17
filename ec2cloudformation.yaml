@@ -1,0 +1,36 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Description: EC2 instance demo
+
+Parameters:
+  PublicSubnet:
+    Type: List<AWS::EC2::PublicSubnet>
+  SGgroups:
+    -!Ref SGgroups
+
+
+Resources:
+  MYEC2motherfokker:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: "ami-79fd7eee"
+      SubnetId: "!Ref PublicSubnet"
+      SecurityGroupIds:
+        - !Ref SGgroups
+      UserData: !Base64
+
+Resources:
+  CheeseRoyal:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-0233214e13e500f77
+      SubnetId: !Ref PublicSubnet
+      InstanceType: !Ref InstanceType
+      SecurityGroupIds:
+        - !Ref SecurityGroup
+      UserData: !Base64 |
+        #!/bin/bash
+        yum -y install httpd
+        EC2_AVAIL_ZONE=`curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone`
+        echo "<html><body><h1>$EC2_AVAIL_ZONE</h1></body></html>" > /var/www/html/index.html
+        service httpd start
